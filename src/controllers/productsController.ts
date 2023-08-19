@@ -19,18 +19,18 @@ export default class ProductsController {
 
     async scheduleProducts() {
         try {
-            const memoryUsage: number[]  = []
+            const memoryUsage: number[] = []
             const products = await productsRepository.getAllProducts();
 
             let i = 1;
             for await (const product of products) {
                 // console.log(process.memoryUsage())
                 console.log((i * 100) / products.length);
-                
+
                 memoryUsage.push(Math.round(process.memoryUsage().rss / 1024 / 1024 * 100) / 100);
                 await axios.get('https://world.openfoodfacts.net/api/v2/product/' + product?.code).then(async (resp: any) => {
                     if (resp.data.status != 0) {
-                        
+
                         const Product = {
                             code: resp.data.code,
                             status: 'published',
@@ -81,16 +81,16 @@ export default class ProductsController {
                 qtd++
             })
 
-            const totalMemory = total / qtd;
+            const totalMemory = Math.ceil(total / qtd);
 
 
-            
+
             console.log('fim', totalMemory);
-            
-            return new Date()
+
+            return { endDate: new Date(), totalMemory: `${totalMemory}MB` }
         } catch (error: any) {
             console.log(error.message, 'aqwui');
-            return new Date()
+            return { endDate: new Date(), totalMemory: `${Math.ceil((process.memoryUsage().rss / 1024 / 1024 * 100) / 100)}MB` }
         }
 
     }
@@ -121,7 +121,7 @@ export default class ProductsController {
         const code = req.params.code;
         const product = req.body;
         console.log(code);
-        
+
         const result = await productsRepository.updateProduct(code, product)
         if (result) {
             return res.json("success");

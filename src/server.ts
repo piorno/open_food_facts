@@ -21,25 +21,16 @@ mongoose.connect(`${process.env.MONGO_HOST}${process.env.MONGO_DATABASE}`, {
 
 const schedule = require('node-schedule');
 
-// var sync = async.queue(function(n, cb) {
-//     var schema = new mongoose.Schema({
-//         data: mongoose.Schema.Types.Mixed
-//     });
-//     var collection = 'model_'+n;
-//     var model = db.model(collection, schema);
-//     setTimeout(function() { cb(); }, 10);
-// }, 1);
-
-const job = schedule.scheduleJob('50 53 16 * * *', async function () {
+const job = schedule.scheduleJob('0 0 3 * * *', async function () {
     console.log('aqui');
     
     const startDate = new Date();
-    const endDate: Date = await productsController.scheduleProducts();
+    const {endDate, totalMemory} = await productsController.scheduleProducts();
     var seconds = (endDate.getTime() - startDate.getTime()) / 1000;
     let log = {
         executed: startDate,
-        memory: 1000,
-        time: seconds
+        memory: totalMemory,
+        time: Math.ceil(seconds)
     }
     
     Logs.create(log)
